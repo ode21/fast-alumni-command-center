@@ -22,9 +22,9 @@ Alternatif CLI dari root repo: `npx vercel --prod` (memerlukan login Vercel).
 ## Fitur
 
 - Ringkasan total alumni, fix voters, target dukungan, progres konfirmasi, dan sebaran kota.
-- Tambah/edit alumni, pencarian dan filter status, PIC, wilayah.
+- Tambah/edit alumni, pencarian dan filter status, PIC, timses, angkatan, jurusan, wilayah.
 - WhatsApp dinormalisasi ke 62; nomor dan ID alumni/NIM unik.
-- Hierarki: Ketua Pemenangan → PIC → timses → alumni. Satu timses menangani maksimal 10 alumni unik. Satu PIC membawahi maksimal 50 timses (kapasitas 500 alumni). Laporan PIC dihitung otomatis dari timses di bawahnya.
+- Hierarki: Jendral Pemenangan → Ketua PIC Angkatan → PIC Jurusan → timses → alumni. Satu timses menangani maksimal 10 alumni unik. Satu PIC jurusan membawahi maksimal 50 timses (kapasitas 500 alumni). Laporan PIC jurusan dihitung otomatis dari timses di bawahnya dan diteruskan ke Ketua PIC Angkatan, lalu Jendral Pemenangan. Satu ketua untuk tiap angkatan; satu PIC jurusan untuk setiap pasangan angkatan dan jurusan. Angkatan alumni mengikuti PIC jurusan melalui timses.
 - Fix voter / sudah memilih membutuhkan persetujuan dan tanggal konfirmasi langsung. Total fix voters sudah mencakup yang memilih, tanpa hitung ganda.
 - Database perusahaan dan komunitas dengan kontak penghubung dan jumlah alumni terhubung.
 - Status masuk grup, catatan tindak lanjut, log aktivitas lokal.
@@ -40,13 +40,15 @@ Repo publik berisi kode dan data simulasi, tanpa database alumni asli. Jangan co
 
 Sebelum dipakai dengan data asli: tambahkan database bersama (misalnya Postgres), login, peran admin/koordinator/PIC, izin akses per PIC, validasi dan unique constraint di server, pencatatan persetujuan, log audit, serta backup otomatis. Vercel menjadi hosting aplikasi; penyimpanan browser bukan database bersama.
 
-Struktur tabel yang disarankan: `coordinators`, `pics`, `teams`, `alumni`, `organizations`, `alumni_organizations`, `support_confirmations`, `activity_logs`. Pasang unique constraint pada nomor WhatsApp ternormalisasi dan ID alumni. Penetapan kapasitas PIC dan timses perlu transaksi server untuk mencegah perebutan slot saat input bersamaan.
+Struktur tabel yang disarankan: `generals`, `cohort_chairs`, `department_pics`, `teams`, `alumni`, `organizations`, `alumni_organizations`, `support_confirmations`, `activity_logs`. Pasang unique constraint pada nomor WhatsApp ternormalisasi dan ID alumni. Penetapan kapasitas PIC dan timses perlu transaksi server untuk mencegah perebutan slot saat input bersamaan.
 
 ## Alur demo
 
-1. Lihat ringkasan dari 24 alumni fiktif dan 4 PIC dan 8 timses.
+1. Lihat ringkasan dari 24 alumni fiktif dan 2 Ketua PIC Angkatan, 4 PIC jurusan dan 8 timses.
 2. Tambah alumni, isi ID alumni/NIM dan WhatsApp baru, pilih timses.
 3. Coba nomor yang sama dengan format +62/08: sistem menolak duplikasi.
 4. Edit status menjadi Fix voter, centang persetujuan dan isi tanggal konfirmasi.
 5. Periksa progres dashboard, data per PIC, perusahaan/komunitas, dan log aktivitas.
 6. Unduh cadangan JSON sebelum memindahkan data ke browser lain.
+
+Role pada prototipe merupakan struktur organisasi untuk plotting dan rekap, belum pembatasan akses login. Mengubah Ketua PIC Angkatan/jurusan pada PIC atau memindahkan timses otomatis mengubah kategori laporan alumni di bawahnya. Cadangan JSON memakai format versi 3.

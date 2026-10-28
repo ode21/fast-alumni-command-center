@@ -1,8 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {phoneKey,validateVoter,metrics,csvCell,validateBackup,validateTeam,picVoters} from '../domain.js';
+import {phoneKey,validateVoter,metrics,csvCell,validateBackup,validateTeam,picVoters,validatePic,validateChair,chairVoters} from '../domain.js';
 const voter=(id='a',extra={})=>({id,name:'Demo Alumni',alumniId:id,phone:'081234567890',team:'t1',status:'Belum dihubungi',city:'Jakarta',company:'',community:'',notes:'',verifiedAt:'',...extra});
-const db=(voters=[])=>({version:2,chief:'Ketua',pics:[{id:'p1',name:'PIC Demo',city:'Jakarta'}],teams:[{id:'t1',name:'Timses Demo',city:'Jakarta',pic:'p1'}],voters,orgs:[],logs:[],target:100});
+const db=(voters=[])=>({version:3,chief:'Jendral',chairs:[{id:'c1',name:'Ketua 2010',year:'2010'}],pics:[{id:'p1',name:'PIC Demo',city:'Jakarta',chair:'c1',department:'Teknik Informatika'}],teams:[{id:'t1',name:'Timses Demo',city:'Jakarta',pic:'p1'}],voters,orgs:[],logs:[],target:100});
 test('normalizes Indonesian phone forms to one identity',()=>{assert.equal(phoneKey('+62 812-3456-7890'),phoneKey('081234567890'));assert.equal(phoneKey('81234567890'),'6281234567890');});
 test('rejects duplicate phone and alumni ID, permits editing same record',()=>{const d=db([voter()]);assert.throws(()=>validateVoter(voter('b'),d),/ganda/);assert.throws(()=>validateVoter(voter('a',{id:'b',phone:'081234567899'}),d),/ganda/);assert.equal(validateVoter(voter(),d).id,'a');});
 test('confirmed support needs explicit consent and confirmation date',()=>{assert.throws(()=>validateVoter(voter('a',{status:'Fix voter'}),db()),/persetujuan/);assert.equal(validateVoter(voter('a',{status:'Fix voter',consent:true,verifiedAt:'2026-10-28'}),db()).status,'Fix voter');});
@@ -13,3 +13,6 @@ test('backup import is validated before replacement',()=>{assert.equal(validateB
 
 test('PIC capacity is limited to 50 timses, permits edit within full PIC',()=>{const d=db();d.teams=Array.from({length:50},(_,i)=>({id:'t'+i,name:'Timses '+i,pic:'p1'}));assert.throws(()=>validateTeam({id:'new',name:'New',pic:'p1'},d),/50 timses/);assert.doesNotThrow(()=>validateTeam(d.teams[0],d));});
 test('PIC reporting rolls up voters through timses ownership',()=>{const d=db([voter()]);assert.equal(picVoters(d,'p1').length,1);d.pics.push({id:'p2',name:'Second'});d.teams[0].pic='p2';assert.equal(picVoters(d,'p1').length,0);assert.equal(picVoters(d,'p2').length,1);});
+
+test('one chair for each cohort and one PIC for each cohort-department',()=>{const d=db();assert.throws(()=>validateChair({id:'c2',name:'Other',year:'2010'},d),/sudah memiliki/);assert.throws(()=>validatePic({id:'p2',name:'Other',chair:'c1',department:'Teknik Informatika'},d),/sudah memiliki/);assert.doesNotThrow(()=>validatePic({id:'p2',name:'Other',chair:'c1',department:'Teknik Industri'},d));});
+test('cohort report rolls up PIC jurusan and their teams',()=>{const d=db([voter()]);assert.equal(chairVoters(d,'c1').length,1);assert.equal(chairVoters(d,'unknown').length,0);assert.equal(validateVoter(voter('a',{year:'1990'}),db()).year,'2010');});
