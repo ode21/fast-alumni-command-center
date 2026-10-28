@@ -1,12 +1,15 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {phoneKey,validateVoter,metrics,csvCell,validateBackup} from '../domain.js';
-const voter=(id='a',extra={})=>({id,name:'Demo Alumni',alumniId:id,phone:'081234567890',pic:'p1',status:'Belum dihubungi',city:'Jakarta',company:'',community:'',notes:'',verifiedAt:'',...extra});
-const db=(voters=[])=>({version:1,pics:[{id:'p1',name:'PIC Demo',target:10}],voters,orgs:[],logs:[],target:100});
+import {phoneKey,validateVoter,metrics,csvCell,validateBackup,validateTeam,picVoters} from '../domain.js';
+const voter=(id='a',extra={})=>({id,name:'Demo Alumni',alumniId:id,phone:'081234567890',team:'t1',status:'Belum dihubungi',city:'Jakarta',company:'',community:'',notes:'',verifiedAt:'',...extra});
+const db=(voters=[])=>({version:2,chief:'Ketua',pics:[{id:'p1',name:'PIC Demo',city:'Jakarta'}],teams:[{id:'t1',name:'Timses Demo',city:'Jakarta',pic:'p1'}],voters,orgs:[],logs:[],target:100});
 test('normalizes Indonesian phone forms to one identity',()=>{assert.equal(phoneKey('+62 812-3456-7890'),phoneKey('081234567890'));assert.equal(phoneKey('81234567890'),'6281234567890');});
 test('rejects duplicate phone and alumni ID, permits editing same record',()=>{const d=db([voter()]);assert.throws(()=>validateVoter(voter('b'),d),/ganda/);assert.throws(()=>validateVoter(voter('a',{id:'b',phone:'081234567899'}),d),/ganda/);assert.equal(validateVoter(voter(),d).id,'a');});
 test('confirmed support needs explicit consent and confirmation date',()=>{assert.throws(()=>validateVoter(voter('a',{status:'Fix voter'}),db()),/persetujuan/);assert.equal(validateVoter(voter('a',{status:'Fix voter',consent:true,verifiedAt:'2026-10-28'}),db()).status,'Fix voter');});
-test('enforces 20 alumni maximum per PIC even on reassignment',()=>{const rows=Array.from({length:20},(_,i)=>voter(String(i),{phone:'628123456'+String(i).padStart(4,'0')}));assert.throws(()=>validateVoter(voter('new',{phone:'081999999999'}),db(rows)),/20 alumni/);assert.doesNotThrow(()=>validateVoter(rows[0],db(rows)));});
+test('enforces 10 alumni maximum per timses even on reassignment',()=>{const rows=Array.from({length:10},(_,i)=>voter(String(i),{phone:'628123456'+String(i).padStart(4,'0')}));assert.throws(()=>validateVoter(voter('new',{phone:'081999999999'}),db(rows)),/10 alumni/);assert.doesNotThrow(()=>validateVoter(rows[0],db(rows)));});
 test('confirmed total includes voted alumni exactly once',()=>{assert.deepEqual(metrics(db([voter('a',{status:'Fix voter'}),voter('b',{status:'Sudah memilih'})])),{total:2,fix:2,voted:1,follow:0});});
 test('CSV neutralizes spreadsheet formula injection and quotes',()=>{assert.equal(csvCell('=HYPERLINK("evil")'),'"\'=HYPERLINK(""evil"")"');assert.equal(csvCell('A,B'),'"A,B"');});
 test('backup import is validated before replacement',()=>{assert.equal(validateBackup(db([voter()])).voters.length,1);assert.throws(()=>validateBackup(db([voter(),voter('b')])),/ganda/);assert.throws(()=>validateBackup({...db(),pics:[{id:'p1',name:'a'},{id:'p1',name:'b'}]}),/PIC/);});
+
+test('PIC capacity is limited to 50 timses, permits edit within full PIC',()=>{const d=db();d.teams=Array.from({length:50},(_,i)=>({id:'t'+i,name:'Timses '+i,pic:'p1'}));assert.throws(()=>validateTeam({id:'new',name:'New',pic:'p1'},d),/50 timses/);assert.doesNotThrow(()=>validateTeam(d.teams[0],d));});
+test('PIC reporting rolls up voters through timses ownership',()=>{const d=db([voter()]);assert.equal(picVoters(d,'p1').length,1);d.pics.push({id:'p2',name:'Second'});d.teams[0].pic='p2';assert.equal(picVoters(d,'p1').length,0);assert.equal(picVoters(d,'p2').length,1);});
