@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#122c27" />
+    <meta
+      name="description"
+      content="Isi konfirmasi dukungan alumni FAST dalam satu formulir singkat."
+    />
+    <title>Konfirmasi Dukungan — FAST</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="form.css" />
+    <script type="module" src="form.js"></script>
+  </head>
+  <body class="public-form">
+    <header class="form-header">
+      <a href="/daftar" class="brand"
+        ><span class="brandmark">F<span>↗</span></span
+        ><span>FAST<span class="brand-sub">RUANG GERAK ALUMNI</span></span></a
+      ><span class="form-time">± 1 menit</span>
+    </header>
+    <main class="registration-main">
+      <div class="form-intro">
+        <span class="eyebrow">SATU KONEKSI. SATU GERAKAN.</span>
+        <h1>Halo, keluarga alumni.</h1>
+        <p>
+          Yuk, konfirmasi dukungan untuk Mas Yanto.<br />Isi singkat, lalu
+          biarkan tim kami membantu selanjutnya.
+        </p>
+        <div class="form-pills">
+          <span>✓ Tanpa login</span><span>✓ Ramah HP</span
+          ><span>✓ Data terbatas untuk tim</span>
+        </div>
+      </div>
+      <section class="registration-card" id="form-card">
+        <div class="card-title">
+          <span class="step-number">1</span>
+          <div>
+            <h2>Kenalan sebentar, yuk.</h2>
+            <p>Kolom bertanda * wajib diisi.</p>
+          </div>
+        </div>
+        <p id="ref-context" class="ref-context" hidden></p>
+        <form id="registration-form">
+          <div class="registration-fields">
+            <label
+              >Nama lengkap *<input
+                name="name"
+                autocomplete="name"
+                maxlength="100"
+                required
+                placeholder="Nama sesuai data alumni" /></label
+            ><label
+              >Nomor WhatsApp *<input
+                name="phone"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                maxlength="30"
+                required
+                placeholder="08xxxxxxxxxx"
+              /><small
+                >Agar penghubung bisa mengonfirmasi data Anda.</small
+              ></label
+            ><label
+              >NIM / ID alumni *<input
+                name="alumniId"
+                autocomplete="off"
+                maxlength="50"
+                required
+                placeholder="NIM atau nomor alumni"
+            /></label>
+            <div class="form-grid">
+              <label
+                >Angkatan masuk *<input
+                  name="year"
+                  type="number"
+                  inputmode="numeric"
+                  min="1950"
+                  max="2100"
+                  required
+                  placeholder="Contoh: 2010" /></label
+              ><label
+                >Kota domisili *<input
+                  name="city"
+                  autocomplete="address-level2"
+                  maxlength="80"
+                  required
+                  placeholder="Contoh: Bandung"
+              /></label>
+            </div>
+            <label
+              >Jurusan / program studi *<input
+                name="department"
+                list="department-list"
+                maxlength="100"
+                required
+                placeholder="Ketik atau pilih jurusan" /><datalist
+                id="department-list"
+              >
+                <option value="Teknik Telekomunikasi"></option>
+                <option value="Teknik Informatika"></option>
+                <option value="Teknik Industri"></option>
+                <option value="Sistem Informasi"></option>
+                <option value="Manajemen"></option></datalist></label
+            ><label id="team-label"
+              >Penghubung / timses <span class="optional">(opsional)</span
+              ><select name="team">
+                <option value="">Belum punya penghubung</option>
+              </select></label
+            >
+          </div>
+          <div class="form-consents">
+            <label
+              ><input type="checkbox" name="support" required /><span
+                >Saya bersedia mendukung <strong>Mas Yanto</strong> dalam
+                pemilihan Presiden FAST secara sukarela.</span
+              ></label
+            ><label
+              ><input type="checkbox" name="consent" required /><span
+                >Saya menyetujui data ini digunakan oleh tim pemenangan untuk
+                pendataan dan konfirmasi dukungan. Data kontak saya tidak
+                ditampilkan kepada publik.</span
+              ></label
+            >
+          </div>
+          <label class="honeypot" aria-hidden="true"
+            >Kosongkan kolom ini<input
+              name="website"
+              tabindex="-1"
+              autocomplete="off"
+          /></label>
+          <p class="form-error" id="registration-error" role="alert"></p>
+          <button
+            class="button primary submit-registration"
+            type="submit"
+            id="submit-registration"
+            disabled
+          >
+            Kirim konfirmasi <span>↗</span>
+          </button>
+          <p class="form-footnote">
+            Setelah dikirim, tim akan memverifikasi data Anda.<br />Anda tidak
+            perlu mengisi formulir ini kembali.
+          </p>
+        </form>
+      </section>
+      <section
+        class="registration-card success-card"
+        id="success-card"
+        hidden
+        tabindex="-1"
+      >
+        <span class="success-mark">✓</span
+        ><span class="eyebrow">KONFIRMASI TERKIRIM</span>
+        <h1>Terima kasih sudah ikut bergerak.</h1>
+        <p>
+          Data Anda sudah tersimpan. Tim akan memeriksa dan menghubungi Anda
+          bila perlu.
+        </p>
+        <div class="receipt">
+          <small>Nomor tanda terima</small><strong id="receipt"></strong>
+        </div>
+        <p class="form-footnote">
+          Simpan tanda terima ini. Jangan mengisi ulang agar data tidak ganda.
+        </p>
+      </section>
+      <p class="privacy-note">
+        Butuh koreksi data? Hubungi orang yang membagikan tautan formulir ini.
+        Jangan pernah membagikan kata sandi atau kode OTP melalui formulir.
+      </p>
+    </main>
+    <footer class="form-footer">FAST · Ruang Gerak Alumni</footer>
+  </body>
+</html>

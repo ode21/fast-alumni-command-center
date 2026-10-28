@@ -1,54 +1,61 @@
 # FAST — Ruang Gerak Alumni
 
-Prototipe pendataan alumni dan monitoring dukungan untuk pemilihan presiden FAST. UI bahasa Indonesia, responsif, tanpa dependensi runtime, siap di-deploy ke Vercel.
+Aplikasi pendataan dan monitoring dukungan pemilihan Presiden FAST. Dashboard responsif untuk HP, formulir publik terpisah, database Neon Postgres bersama, dan API Vercel.
 
-## Jalankan
+## Tautan
 
-Memerlukan Node.js 20 atau lebih baru. Tidak perlu `npm install`.
+- Formulir publik: `/daftar`, tanpa login, satu halaman.
+- Formulir per timses: `/daftar?ref=ID_TIMSES`. Angkatan, jurusan, dan timses terisi dari struktur server.
+- Dashboard pengelola: `/`, memerlukan login `/login`.
+- Simulasi UI dengan data fiktif: `/?demo=1`. Perubahan pada simulasi hanya disimpan di browser dan tidak masuk database bersama.
+
+## Menjalankan
+
+Node.js >=20.
 
 ```sh
+npm ci
 npm run dev
-# http://127.0.0.1:3000
 npm test
 npm run build
 ```
 
-## Deploy Vercel
+Preview lokal: `http://127.0.0.1:3000/?demo=1`. Untuk API lokal, sediakan `DATABASE_URL` dan `ADMIN_PASSWORD` melalui environment proses atau `node --env-file=.env.local server.mjs`. Jangan commit `.env.local`.
 
-Import repository ini melalui **Vercel → Add New → Project → Import Git Repository**. Pilih preset **Other**, build command `npm run build`, output directory `dist`. Tidak ada environment variable. Konfigurasi tersedia pada `vercel.json`.
+## Konfigurasi Vercel
 
-Alternatif CLI dari root repo: `npx vercel --prod` (memerlukan login Vercel).
+Preset **Other**, build `npm run build`, output `dist`. API berada di `api/workspace.js`. Konfigurasi routing dan header tersedia di `vercel.json`.
 
-## Fitur
+Hubungkan Neon Postgres di **Storage**, pilih paket Free sesuai persetujuan pemilik. Tambahkan variabel koneksi sebagai **Sensitive**, khusus Production. Driver membaca `DATABASE_URL` atau `POSTGRES_URL`. Development dan Preview tidak diberi akses otomatis ke database Production.
 
-- Ringkasan total alumni, fix voters, target dukungan, progres konfirmasi, dan sebaran kota.
-- Tambah/edit alumni, pencarian dan filter status, PIC, timses, angkatan, jurusan, wilayah.
-- WhatsApp dinormalisasi ke 62; nomor dan ID alumni/NIM unik.
-- Hierarki: Jendral Pemenangan → Ketua PIC Angkatan → PIC Jurusan → timses → alumni. Satu timses menangani maksimal 10 alumni unik. Satu PIC jurusan membawahi maksimal 50 timses (kapasitas 500 alumni). Laporan PIC jurusan dihitung otomatis dari timses di bawahnya dan diteruskan ke Ketua PIC Angkatan, lalu Jendral Pemenangan. Satu ketua untuk tiap angkatan; satu PIC jurusan untuk setiap pasangan angkatan dan jurusan. Angkatan alumni mengikuti PIC jurusan melalui timses.
-- Fix voter / sudah memilih membutuhkan persetujuan dan tanggal konfirmasi langsung. Total fix voters sudah mencakup yang memilih, tanpa hitung ganda.
-- Database perusahaan dan komunitas dengan kontak penghubung dan jumlah alumni terhubung.
-- Status masuk grup, catatan tindak lanjut, log aktivitas lokal.
-- Ekspor CSV yang menetralkan formula spreadsheet, cadangan JSON, impor cadangan tervalidasi, pengaturan target, reset simulasi.
+Pemilik memasukkan **ADMIN_PASSWORD** secara privat di Vercel Environment Variables, minimum 16 karakter. Kata sandi tidak dikirim melalui chat, tidak ditulis ke repo, dan tidak dimasukkan ke JavaScript publik. Mengganti password membatalkan sesi lama. Redeploy setelah mengubah environment.
 
-## Batas versi contoh
+## Alur operasional
 
-**Data disimpan hanya di localStorage browser yang sedang digunakan**, bukan di server Vercel. Browser/perangkat lain mempunyai data sendiri. Menghapus penyimpanan browser akan menghapus perubahan. Data awal seluruhnya fiktif; nomor berawalan 62800000 adalah placeholder demonstrasi.
+1. Login dashboard dan susun Ketua PIC Angkatan, PIC jurusan, serta timses. Database bersama mulai kosong; data demo browser tidak otomatis diunggah.
+2. Hierarki: **Jendral Pemenangan → Ketua PIC Angkatan → PIC Jurusan pada angkatan tersebut → timses → alumni**. Maksimal 50 timses/PIC jurusan dan 10 alumni/timses.
+3. Bagikan formulir umum dari Pengaturan, atau **Bagikan form** pada timses untuk tautan yang sudah terisi.
+4. Alumni mengisi nama, WhatsApp, NIM/ID alumni, angkatan, jurusan, kota, serta persetujuan dukungan dan pendataan secara mandiri. Penghubung opsional pada formulir umum.
+5. Server menyimpan pendaftaran sebagai pending, dengan nomor tanda terima. Pendaftaran tidak langsung menambah hitungan fix voter.
+6. Pengelola membuka **Pendaftaran**, memilih timses yang sesuai angkatan dan jurusan, lalu memverifikasi. Pendaftaran ganda, angkatan/jurusan tidak sesuai, serta kapasitas penuh ditolak server.
+7. Data terverifikasi masuk dashboard dan rekap angkatan/jurusan/PIC. Halaman pengelola memperbarui data setiap 30 detik ketika tidak sedang mengedit. Perubahan yang bertabrakan ditolak dengan pesan untuk memuat ulang.
 
-Repo publik berisi kode dan data simulasi, tanpa database alumni asli. Jangan commit ekspor/cadangan data pribadi ke repo publik. Demo tidak memiliki autentikasi, kontrol akses, sinkronisasi tim, atau audit server; log lokal dapat diubah pengguna browser.
+## Penyimpanan dan akses
 
-## Tahap operasional bersama
+- fast_workspace: struktur organisasi, alumni terverifikasi, perusahaan/komunitas, target dan log; JSONB dengan revision untuk mencegah perubahan tertimpa.
+- fast_registrations: isian publik, status pending/approved/rejected, unique constraint WhatsApp ternormalisasi dan ID alumni huruf kecil.
+- fast_rate_limits: pembatasan percobaan login dan pengiriman formulir per jam; alamat IP diubah menjadi HMAC, tidak disimpan mentah. Honeypot dan durasi minimum turut menyaring pengiriman otomatis sederhana.
+- Tabel dibuat secara idempoten saat API pertama terhubung; query memakai parameter Neon. Verifikasi memakai kunci baris dan perubahan atomik agar status pendaftaran konsisten dengan workspace.
+- Cookie sesi admin ditandatangani, HttpOnly, Secure pada HTTPS, SameSite Strict, berlaku 8 jam. Mutasi memerlukan JSON dan Origin aplikasi sendiri.
+- Katalog publik hanya berisi nama penghubung, angkatan dan jurusan; tidak mengirim daftar alumni, NIM, kontak, atau catatan pengelola.
+- Akses pengelola MVP memakai satu kata sandi bersama. Hierarki jabatan dipakai untuk plotting dan laporan; belum merupakan izin terpisah per akun. Jangan bagikan kata sandi pengelola kepada pengisi formulir.
 
-Sebelum dipakai dengan data asli: tambahkan database bersama (misalnya Postgres), login, peran admin/koordinator/PIC, izin akses per PIC, validasi dan unique constraint di server, pencatatan persetujuan, log audit, serta backup otomatis. Vercel menjadi hosting aplikasi; penyimpanan browser bukan database bersama.
+## Cadangan dan batas
 
-Struktur tabel yang disarankan: `generals`, `cohort_chairs`, `department_pics`, `teams`, `alumni`, `organizations`, `alumni_organizations`, `support_confirmations`, `activity_logs`. Pasang unique constraint pada nomor WhatsApp ternormalisasi dan ID alumni. Penetapan kapasitas PIC dan timses perlu transaksi server untuk mencegah perebutan slot saat input bersamaan.
+CSV mengekspor alumni terverifikasi (atau hasil filter) dan menetralkan formula spreadsheet. Cadangan JSON memuat workspace serta salinan pendaftaran yang tampil, maksimal 2.000 terbaru. Impor workspace tervalidasi **tidak memulihkan atau menggantikan** tabel pendaftaran. Lakukan backup database terpisah untuk pemulihan lengkap.
 
-## Alur demo
+Antrean menampilkan maksimal 2.000 pendaftaran terbaru. Untuk skala lebih besar tambahkan pagination dan backup terjadwal. Tidak ada OTP WhatsApp; pengelola tetap perlu memeriksa kebenaran identitas dan dukungan. Pembatasan spam sederhana tidak menggantikan layanan anti-abuse bila formulir ramai diserang.
 
-1. Lihat ringkasan dari 24 alumni fiktif dan 2 Ketua PIC Angkatan, 4 PIC jurusan dan 8 timses.
-2. Tambah alumni, isi ID alumni/NIM dan WhatsApp baru, pilih timses.
-3. Coba nomor yang sama dengan format +62/08: sistem menolak duplikasi.
-4. Edit status menjadi Fix voter, centang persetujuan dan isi tanggal konfirmasi.
-5. Periksa progres dashboard, data per PIC, perusahaan/komunitas, dan log aktivitas.
-6. Unduh cadangan JSON sebelum memindahkan data ke browser lain.
+Jangan commit database, ekspor/cadangan berisi data asli, atau kredensial ke repo publik. .gitignore mengecualikan file environment dan direktori deployment lokal.
 
-Role pada prototipe merupakan struktur organisasi untuk plotting dan rekap, belum pembatasan akses login. Mengubah Ketua PIC Angkatan/jurusan pada PIC atau memindahkan timses otomatis mengubah kategori laporan alumni di bawahnya. Cadangan JSON memakai format versi 3.
+Referensi API: [Neon serverless driver](https://neon.com/docs/serverless/serverless-driver), [Vercel Node.js Functions](https://vercel.com/docs/functions/runtimes/node-js).

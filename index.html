@@ -1,5 +1,101 @@
 <!doctype html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#122c27"><meta name="description" content="Prototipe pendataan alumni, PIC, dan monitoring dukungan FAST."><title>FAST — Ruang Gerak Alumni</title><link rel="stylesheet" href="style.css"><script type="module" src="app.js"></script></head>
-<body><aside class="sidebar"><a class="brand" href="#dashboard"><span class="brandmark">F<span>↗</span></span><span>FAST<span class="brand-sub">RUANG GERAK ALUMNI</span></span></a><div class="workspace-label">WORKSPACE PEMENANGAN</div><nav aria-label="Navigasi utama"><button data-page="dashboard"><span>◫</span> Ringkasan</button><button data-page="voters"><span>▤</span> Database alumni <small id="nav-count"></small></button><button data-page="pics"><span>♧</span> Struktur & timses</button><button data-page="orgs"><span>▦</span> Perusahaan & komunitas</button><button data-page="logs"><span>↻</span> Aktivitas</button></nav><div class="side-bottom"><div class="help-card"><span class="live-dot"></span> Satu timses, sepuluh alumni<p>Bangun jejaring yang rapi.<br>Jaga setiap kepercayaan.</p></div><button data-page="settings" class="settings-link">⚙ &nbsp; Pengaturan & cadangan</button><div class="profile"><span class="avatar">OD</span><div>Omar Dhani<small>Koordinator · demo</small></div><span class="profile-dot"></span></div></div></aside>
-<div class="main-shell"><header class="topbar"><span>Workspace <span class="slash">/</span> <strong id="breadcrumb">Ringkasan</strong></span><div class="top-right"><span class="demo-chip">DATA SIMULASI</span><span class="date-display">28 Oktober 2026</span><span class="avatar small">OD</span></div></header><main id="main"></main><footer>FAST / Ruang Gerak Alumni <span>Prototipe · Data tersimpan hanya di browser ini</span></footer></div>
-<dialog id="modal"><form id="editor"><div class="modal-heading"><div><span class="eyebrow">DATABASE FAST</span><h2 id="modal-title"></h2></div><button type="button" id="close-modal" class="icon-button" aria-label="Tutup">×</button></div><div id="fields" class="fields"></div><p id="form-error" class="error" role="alert"></p><div class="modal-actions"><button type="button" id="cancel-modal" class="button secondary">Batal</button><button class="button primary" type="submit">Simpan data ↗</button></div></form></dialog><div id="toast" role="status"></div><input id="backup-file" type="file" accept="application/json" hidden></body></html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#122c27" />
+    <meta
+      name="description"
+      content="Prototipe pendataan alumni, PIC, dan monitoring dukungan FAST."
+    />
+    <title>FAST — Ruang Gerak Alumni</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="mobile.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="#dashboard"
+        ><span class="brandmark">F<span>↗</span></span
+        ><span>FAST<span class="brand-sub">RUANG GERAK ALUMNI</span></span></a
+      ><button
+        class="mobile-settings"
+        data-page="settings"
+        aria-label="Pengaturan"
+      >
+        ⚙
+      </button>
+      <div class="workspace-label">WORKSPACE PEMENANGAN</div>
+      <nav aria-label="Navigasi utama">
+        <button data-page="dashboard"><span>◫</span> Ringkasan</button
+        ><button data-page="voters">
+          <span>▤</span> Database alumni <small id="nav-count"></small></button
+        ><button data-page="pics"><span>♧</span> Struktur & timses</button
+        ><button data-page="orgs"><span>▦</span> Perusahaan & komunitas</button
+        ><button data-page="inbox"><span>↙</span> Pendaftaran</button>
+      </nav>
+      <div class="side-bottom">
+        <div class="help-card">
+          <span class="live-dot"></span> Satu timses, sepuluh alumni
+          <p>Bangun jejaring yang rapi.<br />Jaga setiap kepercayaan.</p>
+        </div>
+        <button data-page="settings" class="settings-link">
+          ⚙ &nbsp; Pengaturan & cadangan
+        </button>
+        <div class="profile">
+          <span class="avatar">OD</span>
+          <div>Omar Dhani<small>Koordinator · demo</small></div>
+          <span class="profile-dot"></span>
+        </div>
+      </div>
+    </aside>
+    <div class="main-shell">
+      <header class="topbar">
+        <span
+          >Workspace <span class="slash">/</span>
+          <strong id="breadcrumb">Ringkasan</strong></span
+        >
+        <div class="top-right">
+          <span class="demo-chip">DATA SIMULASI</span
+          ><span class="date-display">28 Oktober 2026</span
+          ><span class="avatar small">OD</span>
+        </div>
+      </header>
+      <main id="main"><p class="notice">Memuat workspace…</p></main>
+      <footer>
+        FAST / Ruang Gerak Alumni
+        <span>Prototipe · Data tersimpan hanya di browser ini</span>
+      </footer>
+    </div>
+    <dialog id="modal">
+      <form id="editor">
+        <div class="modal-heading">
+          <div>
+            <span class="eyebrow">DATABASE FAST</span>
+            <h2 id="modal-title"></h2>
+          </div>
+          <button
+            type="button"
+            id="close-modal"
+            class="icon-button"
+            aria-label="Tutup"
+          >
+            ×
+          </button>
+        </div>
+        <div id="fields" class="fields"></div>
+        <p id="form-error" class="error" role="alert"></p>
+        <div class="modal-actions">
+          <button type="button" id="cancel-modal" class="button secondary">
+            Batal</button
+          ><button class="button primary" type="submit">Simpan data ↗</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="toast" role="status"></div>
+    <input id="backup-file" type="file" accept="application/json" hidden />
+  </body>
+</html>

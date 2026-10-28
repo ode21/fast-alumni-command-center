@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#122c27" />
+    <title>Masuk Pengelola — FAST</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="form.css" />
+    <script type="module" src="login.js"></script>
+  </head>
+  <body class="public-form">
+    <header class="form-header">
+      <a class="brand" href="/daftar"
+        ><span class="brandmark">F<span>↗</span></span
+        ><span>FAST<span class="brand-sub">RUANG GERAK ALUMNI</span></span></a
+      >
+    </header>
+    <main class="registration-main">
+      <div class="form-intro">
+        <span class="eyebrow">WORKSPACE TIM</span>
+        <h1>Masuk sebagai pengelola.</h1>
+        <p>Kelola jejaring dan periksa pendaftaran alumni di satu tempat.</p>
+      </div>
+      <section class="registration-card">
+        <form id="login-form">
+          <div class="registration-fields">
+            <label
+              >Kata sandi pengelola<input
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                maxlength="200"
+                autofocus
+            /></label>
+          </div>
+          <p class="form-error" id="login-error" role="alert"></p>
+          <button class="button primary submit-registration">
+            Masuk ke dashboard ↗
+          </button>
+        </form>
+      </section>
+      <p class="privacy-note">
+        Ingin mengisi dukungan? <a href="/daftar">Buka formulir alumni →</a>
+      </p>
+    </main>
+  </body>
+</html>
